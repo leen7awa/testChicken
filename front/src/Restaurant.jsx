@@ -21,6 +21,7 @@ const Restaurant = () => {
     };
 
     useEffect(() => {
+
         fetchOrders(); // Fetch orders when component mounts
 
         // Set up the interval to refresh the orders every 10 seconds
@@ -54,7 +55,11 @@ const Restaurant = () => {
                 }
             }
         };
-
+        const pingInterval = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send('ping'); // Send a ping to the server
+            }
+          }, 30000);
         // WebSocket error handling
         socket.onerror = (error) => {
             console.error('WebSocket Error: ', error);

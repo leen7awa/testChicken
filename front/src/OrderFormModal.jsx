@@ -34,6 +34,12 @@ const currentDate = new Date().toLocaleString('en-US');
         socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket
       };
 
+      const pingInterval = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send('ping'); // Send a ping to the server
+        }
+      }, 30000);
+
       // Send the order data to the backend (MongoDB)
       submitOrderToDatabase(newOrder);
 

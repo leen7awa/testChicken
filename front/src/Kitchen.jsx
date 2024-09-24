@@ -99,6 +99,12 @@ const Kitchen = () => {
             });
         };
 
+        const pingInterval = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send('ping'); // Send a ping to the server
+            }
+          }, 30000);
+
         // WebSocket error handling
         socket.onerror = (error) => {
             console.error('WebSocket Error: ', error);

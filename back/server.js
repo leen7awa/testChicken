@@ -35,6 +35,12 @@ const wss = new WebSocket.Server({ server });
 // WebSocket connection logic
 wss.on('connection', async (ws) => {
   console.log('New client connected');
+
+  const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping(); // Send ping message
+    }
+  }, 30000); // Every 30 seconds
   
   ws.on('message', async (message) => {
     console.log(`Received message: ${message}`);
