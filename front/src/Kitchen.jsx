@@ -5,7 +5,9 @@ import OrderDetailsModal from './OrderDetailsModal'; // Import your modal compon
 import './card.css';
 
 // Initialize WebSocket connection
-const socket = new WebSocket('ws://localhost:8081/');
+// const socket = new WebSocket('ws://localhost:8081/');
+// const socket = new WebSocket('ws://192.168.68.125:8081/');
+const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');
 
 const Kitchen = () => {
     const [orders, setOrders] = useState([]); // Initialize with an empty array
@@ -29,7 +31,9 @@ const Kitchen = () => {
     const fetchOrders = async () => {
         // Fetch orders from the backend
         try {
-            const response = await fetch('http://localhost:8081/orders'); // Update with your backend URL
+            // const response = await fetch('http://localhost:8081/orders');
+            // const response = await fetch('http://192.168.68.125:8081/orders');
+            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
             const data = await response.json();
             setOrders(data); // Set the orders with the data from the backend
         } catch (error) {

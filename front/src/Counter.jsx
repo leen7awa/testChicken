@@ -6,7 +6,7 @@ import Header from './Header';
 import './card.css';
 
 // Initialize WebSocket connection
-const socket = new WebSocket('ws://localhost:8081/');
+const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');
 
 const Counter = () => {
     const [orders, setOrders] = useState([]); // Initialize with an empty array
@@ -33,7 +33,7 @@ const Counter = () => {
     // Fetch orders from the database
     const fetchOrders = async () => {
         try {
-            const response = await fetch('http://localhost:8081/orders'); // Fetch from backend
+            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Fetch from backend
             const data = await response.json();
             setOrders(data); // Set orders fetched from the database
         } catch (error) {
