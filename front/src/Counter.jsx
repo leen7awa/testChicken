@@ -107,7 +107,7 @@ const Counter = () => {
     // Function to delete the order from the database
     const deleteOrderFromDB = async (orderNumber) => {
         try {
-            const response = await fetch(`http://localhost:8081/orders/${orderNumber}`, {
+            const response = await fetch(`https://rest1-04005fd2a151.herokuapp.com/orders/${orderNumber}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
