@@ -8,8 +8,9 @@ const OrderFormModal = ({ onClose, onSubmit }) => {
   const hasSaved = useRef(false);  // To track if the order has already been saved
   const socket = new WebSocket('ws://localhost:8081');  // WebSocket connection
 
-  // Get current date and time in a format compatible with MongoDB
-  const currentDate = new Date().toLocaleString();
+  // const currentDate = new Date().toLocaleString();
+const currentDate = new Date().toLocaleString('en-US'); 
+
 
   const handleSubmit = () => {
     const itemsArray = orderItems.split(',').map(item => ({

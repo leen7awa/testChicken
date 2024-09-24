@@ -1,5 +1,4 @@
 import React from "react";
-// import './windowMsg.css';
 import './modal.css';
 
 const OrderDetailsModal = ({ order, onClick }) => {
@@ -7,16 +6,18 @@ const OrderDetailsModal = ({ order, onClick }) => {
         <div className="modal-overlay">
             <div className="flex flex-col text-sm modal-content space-y-2 bg-[#fff2cd] border-2 border-gray-800">
                 <div className="flex-1">
-                    <h4>מספר הזמנה: {order.orderNumber}</h4>
+                    <h4 className="text-lg">מספר הזמנה: {order.orderNumber}</h4>
                     <div className="justify justify-between text-end text-sm">
                         <h4>שם לקוח: {order.customerName}</h4>
-                        <h4>התקבלה ב: {order.date.replace('T', ' ')}</h4>
+                        <h4>התקבלה ב</h4>
+                        <h4 className="text-center">{new Date(order.date).toLocaleString()}</h4>
+
                     </div>
                 </div>
                 <div className="flex-1 max-h-96 md:max-h-80 sm:max-h-64 overflow-y-auto">
                     <ul>
                         {order.orderItems.map((item, index) => (
-                            <li key={index}>{item}</li>
+                            <li key={index}>{item.name}</li>
                         ))}
                     </ul>
                 </div>

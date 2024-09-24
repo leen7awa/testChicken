@@ -140,7 +140,7 @@ const Kitchen = () => {
                                     <div className='flex-col font-bold text-base overflow-hidden text-ellipsis'>
                                         <h2 className='text-xl'>מספר הזמנה {order.orderNumber}</h2>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-base'>{order.date}</h4>
+                                        <h4 className='text-sm'>{new Date(order.date).toLocaleString()}</h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>

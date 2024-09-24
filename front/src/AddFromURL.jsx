@@ -17,15 +17,15 @@ const AddFromURL = () => {
         if (!hasSaved.current) {
             if (orderNumber && customerName && orderItems) {
                 const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
-    
+
                 const isOrderNumberExists = existingOrders.some(order => order.orderNumber === orderNumber);
-    
+
                 if (!isOrderNumberExists) {
                     // Parse the order items and keep only the name
                     const parsedOrderItems = orderItems.split(',').map(item => ({
                         name: item.trim()  // Only store the name of the item
                     }));
-    
+
                     // Create new order object
                     const newOrder = {
                         orderNumber,
@@ -34,7 +34,7 @@ const AddFromURL = () => {
                         date: currentDate,
                         status,
                     };
-    
+
                     // Prevent multiple submissions
                     hasSaved.current = true;
 
@@ -42,13 +42,16 @@ const AddFromURL = () => {
                     socket.onopen = () => {
                         socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket
                     };
-    
+
                     // Send the order data to the backend (MongoDB)
                     submitOrderToDatabase(newOrder);
-    
+
                     // Save new order to localStorage
                     const updatedOrders = [...existingOrders, newOrder];
                     localStorage.setItem('orders', JSON.stringify(updatedOrders));
+                    setTimeout(() => {
+                        window.close();
+                    }, 100);
                 } else {
                     console.log(`Order with orderNumber ${orderNumber} already exists.`);
                 }

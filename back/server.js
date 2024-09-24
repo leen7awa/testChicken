@@ -9,15 +9,14 @@ const app = express();
 const port = process.env.PORT || 8081;
 
 // Middleware to parse JSON requests
-app.use(express.json());
 
-// Enable CORS for all routes
 app.use(cors({
-  // origin: ['http://localhost:5173', 'https://chic-chicken-oss-929342691ddb.herokuapp.com'],  // Allow requests from frontend on localhost and deployed URL
-  origin: '*',  // Allow requests from frontend on localhost and deployed URL
+  origin: '*', // Allow requests from both localhost and your deployed frontend URL
   methods: ['GET', 'POST', 'DELETE'],
-  credentials: true  // Allow cookies if needed
+  credentials: true  // Allow cookies or other credentials if needed
 }));
+
+app.use(express.json());
 
 // MongoDB connection setup
 mongoose.connect('mongodb+srv://leenhawa670:UNguIsj3lR1DCYZb@cluster0.zhlfc.mongodb.net/restaurantOrdersDB?retryWrites=true&w=majority', {

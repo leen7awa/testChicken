@@ -156,7 +156,7 @@ const Counter = () => {
                                             </span>
                                         </h4>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-base'>{order.date}</h4>
+                                        <h4 className='text-base'>{new Date(order.date).toLocaleString()}</h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>
