@@ -3,9 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 const AddFromURL = () => {
     const [status] = useState(0);  // Default status
     const hasSaved = useRef(false);  // To track if the order is already saved
-    const [orders, setOrders] = useState([]);
     const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');  // WebSocket connection
-
     // Retrieve parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const orderNumber = urlParams.get('orderNumber');
@@ -14,30 +12,13 @@ const AddFromURL = () => {
 
     const currentDate = new Date().toLocaleString('en-US');  // Get current date and time
 
-    // Fetch orders from the backend
-    const fetchOrders = async () => {
-        try {
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Replace with your backend URL
-            const data = await response.json();
-            setOrders(data); // Update orders state with fetched data
-        } catch (error) {
-            console.error('Error fetching orders:', error);
-        }
-    };
-
-    // Fetch orders when component mounts
     useEffect(() => {
+		
         if (!hasSaved.current) {
-            fetchOrders();
-        }
-    }, []);
-
-    // Check if the order number exists after orders are fetched
-    useEffect(() => {
-        if (orders.length > 0 && !hasSaved.current) {  // Ensure orders are fetched first
             if (orderNumber && customerName && orderItems) {
-                // Check if the orderNumber already exists in the fetched orders
-                const isOrderNumberExists = orders.some(order => order.orderNumber === orderNumber);
+                const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
+
+                const isOrderNumberExists = existingOrders.some(order => order.orderNumber === orderNumber);
 
                 if (!isOrderNumberExists) {
                     // Parse the order items and keep only the name
@@ -72,23 +53,22 @@ const AddFromURL = () => {
                     submitOrderToDatabase(newOrder);
 
                     // Save new order to localStorage
-                    const updatedOrders = [...orders, newOrder];
+                    const updatedOrders = [...existingOrders, newOrder];
                     localStorage.setItem('orders', JSON.stringify(updatedOrders));
-                    console.log(updatedOrders);
-                    // Close the window after a successful order addition
                     setTimeout(() => {
                         window.close();
-                    }, 1000);
-                } else {
+                    }, 100);
+                }
+                else {
                     console.log(`Order with orderNumber ${orderNumber} already exists.`);
                 }
             }
         }
-    }, [orders, orderNumber, customerName, orderItems, status, currentDate]);  // Run when orders are updated
+    }, [orderNumber, customerName, orderItems, status, currentDate]);
 
     // Function to submit the order to the backend
     const submitOrderToDatabase = async (orderDetails) => {
-        console.log('Submit to database:', orderDetails);
+		console.log(orderDetails);
         try {
             const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/createOrder', {
                 method: 'POST',
@@ -105,7 +85,7 @@ const AddFromURL = () => {
     };
 
     return (
-        <div className='bg-slate-300 justify-center'>
+        <div className='bg-slate-300 justify justify-center'>
             <div className='container text-center'>
                 <p>Order Number: {orderNumber}</p>
                 <p>Customer Name: {customerName}</p>

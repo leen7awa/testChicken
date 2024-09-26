@@ -99,7 +99,10 @@ const Kitchen = () => {
 
         const pingInterval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-                socket.send('ping'); // Send a ping to the server
+
+            }
+            else {
+                location.reload();
             }
         }, 10000);
 

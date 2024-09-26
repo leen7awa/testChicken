@@ -4,6 +4,7 @@ const AddFromURL = () => {
     const [status] = useState(0);  // Default status
     const hasSaved = useRef(false);  // To track if the order is already saved
     const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');  // WebSocket connection
+    
     // Retrieve parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const orderNumber = urlParams.get('orderNumber');
@@ -12,63 +13,61 @@ const AddFromURL = () => {
 
     const currentDate = new Date().toLocaleString('en-US');  // Get current date and time
 
-    useEffect(() => {
-		
-        if (!hasSaved.current) {
-            if (orderNumber && customerName && orderItems) {
-                const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    const [numberExist, setNumberExist] = useState(false);
 
-                const isOrderNumberExists = existingOrders.some(order => order.orderNumber === orderNumber);
+    const fetchOrders = async () => {
+        try {
+            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Replace with your backend URL
+            const data = await response.json();
 
-                if (!isOrderNumberExists) {
-                    // Parse the order items and keep only the name
-                    const parsedOrderItems = orderItems.split(',').map(item => ({
-                        name: item.trim()  // Only store the name of the item
-                    }));
+            // Check if the order number exists
+            const exists = data.some(order => Number(order.orderNumber) === Number(orderNumber));
 
-                    // Create new order object
-                    const newOrder = {
-                        orderNumber,
-                        customerName,
-                        orderItems: parsedOrderItems,  // Send only the name for each item
-                        date: currentDate,
-                        status,
-                    };
+            if (exists) {
+                setNumberExist(true);
+                // console.log(`Order with orderNumber ${orderNumber} already exists.`);
+                alert('מספר ההזמנה קיים במערכת!');
+            } else {
+                // If the order does not exist, add it to the database
+                const parsedOrderItems = orderItems.split(',').map(item => ({
+                    name: item.trim()  // Only store the name of the item
+                }));
 
-                    // Prevent multiple submissions
-                    hasSaved.current = true;
+                const newOrder = {
+                    orderNumber,
+                    customerName,
+                    orderItems: parsedOrderItems,  // Send only the name for each item
+                    date: currentDate,
+                    status,
+                };
 
-                    // WebSocket: Wait until the connection is open before sending the message
-                    socket.onopen = () => {
-                        socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket
-                    };
+                // Submit the order to the database
+                await submitOrderToDatabase(newOrder);
 
-                    const pingInterval = setInterval(() => {
-                        if (socket.readyState === WebSocket.OPEN) {
-                            socket.send('ping'); // Send a ping to the server
-                        }
-                    }, 30000);
+                // Send the order through WebSocket
+                socket.onopen = () => {
+                    socket.send(JSON.stringify(newOrder));
+                };
 
-                    // Send the order data to the backend (MongoDB)
-                    submitOrderToDatabase(newOrder);
-
-                    // Save new order to localStorage
-                    const updatedOrders = [...existingOrders, newOrder];
-                    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-                    setTimeout(() => {
-                        window.close();
-                    }, 100);
-                }
-                else {
-                    console.log(`Order with orderNumber ${orderNumber} already exists.`);
-                }
+                setTimeout(() => {
+                    window.close();
+                }, 100);
             }
+
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (!hasSaved.current) {
+            fetchOrders();  // Fetch the orders when the component mounts
+            hasSaved.current = true;  // Prevent further submissions
         }
     }, [orderNumber, customerName, orderItems, status, currentDate]);
 
     // Function to submit the order to the backend
     const submitOrderToDatabase = async (orderDetails) => {
-		console.log(orderDetails);
         try {
             const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/createOrder', {
                 method: 'POST',
