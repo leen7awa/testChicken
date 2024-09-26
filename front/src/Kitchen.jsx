@@ -114,7 +114,7 @@ const Kitchen = () => {
 
     // Filter orders based on the statusFilters array
     const filteredOrders = orders.filter((order) => statusFilters[order.status]);
-
+//  bg-[url('/icon.png')]
     return (
         <>
             <div className="bg-[#ffa900] h-screen overflow-y-auto">
