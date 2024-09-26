@@ -40,7 +40,7 @@ wss.on('connection', async (ws) => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.ping(); // Send ping message
     }
-  }, 30000); // Every 30 seconds
+  }, 30000);
   
   ws.on('message', async (message) => {
     console.log(`Received message: ${message}`);

@@ -31,8 +31,6 @@ const Kitchen = () => {
     const fetchOrders = async () => {
         // Fetch orders from the backend
         try {
-            // const response = await fetch('http://localhost:8081/orders');
-            // const response = await fetch('http://192.168.68.125:8081/orders');
             const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
             const data = await response.json();
             setOrders(data); // Set the orders with the data from the backend
@@ -101,9 +99,9 @@ const Kitchen = () => {
 
         const pingInterval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send('ping'); // Send a ping to the server
+                socket.send('ping'); // Send a ping to the server
             }
-          }, 30000);
+        }, 10000);
 
         // WebSocket error handling
         socket.onerror = (error) => {
@@ -150,7 +148,9 @@ const Kitchen = () => {
                                     <div className='flex-col font-bold text-base overflow-hidden text-ellipsis'>
                                         <h2 className='text-xl'>מספר הזמנה {order.orderNumber}</h2>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-sm'>{new Date(order.date).toLocaleString()}</h4>
+                                        <h4 className="text-center">
+                                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                                        </h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>

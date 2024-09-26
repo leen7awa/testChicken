@@ -71,9 +71,9 @@ const Counter = () => {
 
         const pingInterval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send('ping'); // Send a ping to the server
+                socket.send('ping'); // Send a ping to the server
             }
-          }, 30000);
+        }, 30000);
 
         // WebSocket error handling
         socket.onerror = (error) => {
@@ -162,8 +162,9 @@ const Counter = () => {
                                             </span>
                                         </h4>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-base'>{new Date(order.date).toLocaleString()}</h4>
-                                    </div>
+                                        <h4 className="text-center">
+                                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                                        </h4>                                    </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>
                                         <button
