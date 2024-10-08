@@ -45,7 +45,7 @@ const Kitchen = () => {
         fetchOrders(); // Fetch orders when component mounts
 
         // Set up the interval to refresh orders every 10 seconds
-        const intervalId = setInterval(fetchOrders, 10000);
+        const intervalId = setInterval(fetchOrders, 5000);
 
         return () => clearInterval(intervalId); // Cleanup the interval on component unmount
     }, []);
@@ -101,9 +101,12 @@ const Kitchen = () => {
 
         const pingInterval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send('ping'); // Send a ping to the server
+
             }
-          }, 30000);
+            else {
+                location.reload();
+            }
+        }, 10000);
 
         // WebSocket error handling
         socket.onerror = (error) => {
@@ -150,7 +153,9 @@ const Kitchen = () => {
                                     <div className='flex-col font-bold text-base overflow-hidden text-ellipsis'>
                                         <h2 className='text-xl'>מספר הזמנה {order.orderNumber}</h2>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-sm'>{new Date(order.date).toLocaleString()}</h4>
+                                        <h4 className="text-center">
+                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                        </h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>

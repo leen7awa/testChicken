@@ -97,7 +97,7 @@ const Counter = () => {
         };
 
         // Set up the interval to refresh the page every 10 seconds
-        const intervalId = setInterval(fetchOrders, 10000);
+        const intervalId = setInterval(fetchOrders, 5000);
 
         // Cleanup the interval on component unmount
         return () => clearInterval(intervalId);
@@ -162,7 +162,9 @@ const Counter = () => {
                                             </span>
                                         </h4>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
-                                        <h4 className='text-base'>{new Date(order.date).toLocaleString()}</h4>
+                                        <h4 className="text-center">
+                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                        </h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>

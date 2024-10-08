@@ -22,13 +22,13 @@ const currentDate = new Date().toLocaleString('en-US');
       customerName,
       orderItems: itemsArray,  // Send only the name for each item
       date: currentDate,  // Use the new date format
-      status: 0,
+      status: 1,
     };
 
     // Ensure we only save the order once
     if (!hasSaved.current) {
       onSubmit(newOrder);
-
+// console.log(newOrder);
       // WebSocket: Wait until the connection is open before sending the message
       socket.onopen = () => {
         socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket

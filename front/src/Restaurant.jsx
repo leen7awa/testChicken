@@ -5,6 +5,7 @@ import RestaurantHeader from "./RestaurantHeader";
 const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com//');
 
 const Restaurant = () => {
+	
     const [orders, setOrders] = useState([]); // State to store orders from the database
     const [readyOrders, setReadyOrders] = useState([]);
     const [preppingOrders, setPreppingOrders] = useState([]);
@@ -25,7 +26,7 @@ const Restaurant = () => {
         fetchOrders(); // Fetch orders when component mounts
 
         // Set up the interval to refresh the orders every 10 seconds
-        const intervalId = setInterval(fetchOrders, 10000);
+        const intervalId = setInterval(fetchOrders, 5000);
 
         return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }, []);
@@ -100,58 +101,63 @@ const Restaurant = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setCurrentImageIndex(prevIndex => (prevIndex + 1) % images.length);
-        }, 3000);
+        }, 10000);
 
         return () => clearInterval(intervalId);
     }, [images.length]);
 
     return (
         <>
+		<div className='max-h-[100%]'>
+		
             {/* Top section */}
             <RestaurantHeader />
             
-            <div className="flex h-screen text-center text-4xl font-bold bg-yellow-100">
+            <div className="flex max-h-fit text-center text-4xl font-bold bg-yellow-100">
                 {/* Prepping Orders Section */}
                 <div className="flex-1">
-                    <div className="flex-row p-4 font-normal text-2xl">
+                    <div className="flex-row p-4 space-y-2 font-normal text-2xl text-gray-800">
                         {preppingOrders.map(order => (
                             <div
                                 key={order.orderNumber}
-                                className="border-black border-b-2 p-2 justify justify-between flex"
+                                className="border-black border-2 bg-yellow-500 rounded-2xl p-4 justify justify-between flex"
                             >
-                                <div className="font-bold text-3xl">{order.orderNumber}</div>
-                                <div className="font-bold text-3xl">{order.customerName}</div>
+                                <div className="font-semibold text-[50px]">{order.orderNumber}</div>
+                                <div className="font-semibold text-[50px]">{order.customerName}</div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Image Carousel Section */}
-                <div className="flex-grow flex w-32 justify-center items-center">
-                    <div className="w-full h-full flex justify-center items-center">
+                <div className="flex-grow flex w-32 justify-center items-center h-fit">
+                    <div className="w-full h-full flex flex-col justify-between items-center">
                         <img
                             src={`/images/${images[currentImageIndex]}`}
                             alt={`Restaurant Image ${currentImageIndex + 1}`}
                             className="w-full h-full object-fill"
                         />
+						 <img src={'/Logobshara.png'} alt="Logo" className="items-center justify-center w-full h-56" />
                     </div>
                 </div>
 
                 {/* Ready Orders Section */}
                 <div className="flex-1">
-                    <div className="flex-row gap-4 p-4 font-bold text-2xl">
+                    <div className="flex-row gap-4 space-y-2 p-4 font-bold text-2xl text-gray-800">
                         {readyOrders.map(order => (
                             <div
                                 key={order.orderNumber}
-                                className="border-black border-b-2 p-2 justify justify-between flex"
+                                className="border-black border-2 bg-green-500 rounded-2xl p-4 justify justify-between flex"
                             >
-                                <div className="font-bold text-3xl">{order.orderNumber}</div>
-                                <div className="font-bold text-3xl">{order.customerName}</div>
+                                <div className="font-semibold text-[50px]">{order.orderNumber}</div>
+                                <div className="font-semibold text-[50px]">{order.customerName}</div>
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
+				</div>
+				
+			</div>
         </>
     );
 };
