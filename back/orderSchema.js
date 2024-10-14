@@ -10,7 +10,8 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     date: { type: Date, default: Date.now },
-    status: { type: Number, default: 0 }
+    status: { type: Number, default: 1 },
+    branch: { type: Number, required: true }
 });
 
 

@@ -3,9 +3,10 @@ import RestaurantHeader from "./RestaurantHeader";
 
 // Initialize WebSocket connection
 const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com//');
+// const socket = new WebSocket('ws://localhost:8081/');
 
 const Restaurant = () => {
-	
+
     const [orders, setOrders] = useState([]); // State to store orders from the database
     const [readyOrders, setReadyOrders] = useState([]);
     const [preppingOrders, setPreppingOrders] = useState([]);
@@ -13,7 +14,8 @@ const Restaurant = () => {
     // Fetch orders from the backend when the component mounts
     const fetchOrders = async () => {
         try {
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Replace with your backend URL
+            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
+            // const response = await fetch('http://localhost:8081/orders');
             const data = await response.json();
             setOrders(data); // Set orders fetched from the backend
         } catch (error) {
@@ -58,9 +60,9 @@ const Restaurant = () => {
         };
         const pingInterval = setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send('ping'); // Send a ping to the server
+                socket.send('ping'); // Send a ping to the server
             }
-          }, 30000);
+        }, 30000);
         // WebSocket error handling
         socket.onerror = (error) => {
             console.error('WebSocket Error: ', error);
@@ -87,13 +89,27 @@ const Restaurant = () => {
         setReadyOrders(filteredReadyOrders);
     }, [orders]);
 
-    const [images] = useState([
-        "image1.jpg",
-        "image2.jpg",
-        "image3.jpg",
-        "image4.jpg",
-        "image5.jpg"
-    ]);
+    // const [images] = useState([
+    //     "image1.jpg",
+    //     "image2.jpg",
+    //     "image3.jpg",
+    //     "image4.jpg",
+    //     "image5.jpg"
+    // ]);
+
+    // Import all images in the directory
+    const modules = import.meta.glob('./assets/images/*.jpg');
+    const [images, setImages] = useState([]);
+
+    useEffect(() => {
+        // Convert the modules into an array of promises to fetch image paths
+        const imagePromises = Object.values(modules).map((importImage) => importImage());
+
+        // Once all promises resolve, update the state with image URLs
+        Promise.all(imagePromises).then((resolvedImages) => {
+            setImages(resolvedImages.map((img) => img.default || img));
+        });
+    }, []);
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -108,56 +124,59 @@ const Restaurant = () => {
 
     return (
         <>
-		<div className='max-h-[100%]'>
-		
-            {/* Top section */}
-            <RestaurantHeader />
-            
-            <div className="flex max-h-fit text-center text-4xl font-bold bg-yellow-100">
-                {/* Prepping Orders Section */}
-                <div className="flex-1">
-                    <div className="flex-row p-4 space-y-2 font-normal text-2xl text-gray-800">
-                        {preppingOrders.map(order => (
-                            <div
-                                key={order.orderNumber}
-                                className="border-black border-2 bg-yellow-500 rounded-2xl p-4 justify justify-between flex"
-                            >
-                                <div className="font-semibold text-[50px]">{order.orderNumber}</div>
-                                <div className="font-semibold text-[50px]">{order.customerName}</div>
-                            </div>
-                        ))}
+            <div className='max-h-[100%]'>
+
+                {/* Top section */}
+                <RestaurantHeader />
+
+                <div className="flex max-h-fit text-center text-4xl font-bold bg-yellow-100">
+                    {/* Prepping Orders Section */}
+                    <div className="flex-1">
+                        <div className="flex-row p-4 space-y-2 font-normal text-2xl text-gray-800">
+                            {preppingOrders.map(order => (
+                                <div
+                                    key={order.orderNumber}
+                                    className="border-black border-2 bg-yellow-500 rounded-2xl p-4 justify justify-between flex"
+                                >
+                                    <div className="font-semibold text-[50px]">{order.orderNumber}</div>
+                                    <div className="font-semibold text-[50px]">{order.customerName}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Image Carousel Section */}
+                    <div className="flex-grow flex w-32 justify-center items-center h-fit">
+                        <div className="w-full h-full flex flex-col justify-between items-center">
+                            {images.length > 0 && (
+                                <img
+                                    src={images[currentImageIndex]}
+                                    alt={`image-${currentImageIndex}`}
+                                    className="w-full h-full object-cover"
+                                // className="w-full h-full object-fill"
+                                />
+                            )}
+                            <img src={'/Logobshara.png'} alt="Logo" className="items-center justify-center w-full h-56" />
+                        </div>
+                    </div>
+
+                    {/* Ready Orders Section */}
+                    <div className="flex-1">
+                        <div className="flex-row gap-4 space-y-2 p-4 font-bold text-2xl text-gray-800">
+                            {readyOrders.map(order => (
+                                <div
+                                    key={order.orderNumber}
+                                    className="border-black border-2 bg-green-500 rounded-2xl p-4 justify justify-between flex"
+                                >
+                                    <div className="font-semibold text-[50px]">{order.orderNumber}</div>
+                                    <div className="font-semibold text-[50px]">{order.customerName}</div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* Image Carousel Section */}
-                <div className="flex-grow flex w-32 justify-center items-center h-fit">
-                    <div className="w-full h-full flex flex-col justify-between items-center">
-                        <img
-                            src={`/images/${images[currentImageIndex]}`}
-                            alt={`Restaurant Image ${currentImageIndex + 1}`}
-                            className="w-full h-full object-fill"
-                        />
-						 <img src={'/Logobshara.png'} alt="Logo" className="items-center justify-center w-full h-56" />
-                    </div>
-                </div>
-
-                {/* Ready Orders Section */}
-                <div className="flex-1">
-                    <div className="flex-row gap-4 space-y-2 p-4 font-bold text-2xl text-gray-800">
-                        {readyOrders.map(order => (
-                            <div
-                                key={order.orderNumber}
-                                className="border-black border-2 bg-green-500 rounded-2xl p-4 justify justify-between flex"
-                            >
-                                <div className="font-semibold text-[50px]">{order.orderNumber}</div>
-                                <div className="font-semibold text-[50px]">{order.customerName}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-				</div>
-				
-			</div>
+            </div>
         </>
     );
 };

@@ -10,6 +10,7 @@ const AddFromURL = () => {
     const orderNumber = urlParams.get('orderNumber');
     const customerName = urlParams.get('customerName');
     const orderItems = urlParams.get('orderItems');
+    const branchNumber = urlParams.get('branchNumber');
 
     const currentDate = new Date().toLocaleString('en-US');  // Get current date and time
 
@@ -38,7 +39,8 @@ const AddFromURL = () => {
                     customerName,
                     orderItems: parsedOrderItems,  // Send only the name for each item
                     date: currentDate,
-                    status,
+                    status: 1,
+                    branch: branchNumber,
                 };
 
                 // Submit the order to the database
@@ -65,7 +67,7 @@ const AddFromURL = () => {
             fetchOrders();  // Fetch the orders when the component mounts
             hasSaved.current = true;  // Prevent further submissions
         }
-    }, [orderNumber, customerName, orderItems, status, currentDate]);
+    }, [orderNumber, customerName, orderItems, status, currentDate,branchNumber]);
 
     // Function to submit the order to the backend
     const submitOrderToDatabase = async (orderDetails) => {

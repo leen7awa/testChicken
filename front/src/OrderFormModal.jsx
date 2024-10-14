@@ -2,14 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import './modal.css';
 
 const OrderFormModal = ({ onClose, onSubmit }) => {
+  // const [branch] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [orderItems, setOrderItems] = useState('');
+  const [branch, setBranch] = useState('');
   const hasSaved = useRef(false);  // To track if the order has already been saved
   const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');  // WebSocket connection
+  // const socket = new WebSocket('ws://localhost:8081/');  // WebSocket connection
 
   // const currentDate = new Date().toLocaleString();
-const currentDate = new Date().toLocaleString('en-US'); 
+  const currentDate = new Date().toLocaleString('en-US');
 
 
   const handleSubmit = () => {
@@ -23,12 +26,13 @@ const currentDate = new Date().toLocaleString('en-US');
       orderItems: itemsArray,  // Send only the name for each item
       date: currentDate,  // Use the new date format
       status: 1,
+      branch,
     };
 
     // Ensure we only save the order once
     if (!hasSaved.current) {
       onSubmit(newOrder);
-// console.log(newOrder);
+      // console.log(newOrder);
       // WebSocket: Wait until the connection is open before sending the message
       socket.onopen = () => {
         socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket
@@ -51,6 +55,7 @@ const currentDate = new Date().toLocaleString('en-US');
   const submitOrderToDatabase = async (orderDetails) => {
     try {
       const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/createOrder', {
+      // const response = await fetch('http://localhost:8081/createOrder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,18 +72,30 @@ const currentDate = new Date().toLocaleString('en-US');
   return (
     <div className="modal-overlay">
       <div className="flex flex-col text-sm modal-content space-y-2 bg-[#fff2cd] border-2 border-gray-800 p-4">
-        <h4>הוסף הזמנה חדשה</h4>
+        <h4 className="font-bold border-b-2 border-black">הוסף הזמנה חדשה</h4>
         <div className="flex flex-col space-y-2 text-end">
-          <label>
-            מספר הזמנה
-            <input
-              type="text"
-              className="border w-full p-2"
-              value={orderNumber}
-              onChange={(e) => setOrderNumber(e.target.value)}
-              required
-            />
-          </label>
+          <div className="flex flex-row space-x-1 items-center">
+            <label>
+              מספר סניף
+              <input
+                type="text"
+                className="border w-1/2 p-2"
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              מספר הזמנה
+              <input
+                type="text"
+                className="border w-1/2 p-2"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
+                required
+              />
+            </label>
+          </div>
           <label>
             שם לקוח
             <input
@@ -89,7 +106,7 @@ const currentDate = new Date().toLocaleString('en-US');
             />
           </label>
           <label>
-            פריטי הזמנה (מופרדים בפסיקים):
+            פריטי הזמנה (מופרדים בפסיקים)
             <input
               type="text"
               className="border w-full p-2 text-end"

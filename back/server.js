@@ -4,9 +4,10 @@ const WebSocket = require('ws');
 const mongoose = require('mongoose');
 const cors = require('cors');  // Import the CORS middleware
 const Order = require('./orderSchema'); // Import the Mongoose order model
+require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 8081;
+const port = process.env.PORT;
 
 // Middleware to parse JSON requests
 
@@ -18,8 +19,10 @@ app.use(cors({
 
 app.use(express.json());
 
+const db_url = process.env.MONGO_URI;
+
 // MongoDB connection setup
-mongoose.connect('mongodb+srv://leenhawa670:UNguIsj3lR1DCYZb@cluster0.zhlfc.mongodb.net/restaurantOrdersDB?retryWrites=true&w=majority', {
+mongoose.connect(db_url, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -36,11 +39,11 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', async (ws) => {
   console.log('New client connected');
 
-  const pingInterval = setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.ping(); // Send ping message
-    }
-  }, 30000); // Every 30 seconds
+  // const pingInterval = setInterval(() => {
+  //   if (ws.readyState === WebSocket.OPEN) {
+  //     ws.ping(); // Send ping message
+  //   }
+  // }, 30000); // Every 30 seconds
   
   ws.on('message', async (message) => {
     console.log(`Received message: ${message}`);

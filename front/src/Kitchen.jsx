@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import StatusConvert from './StatusConvert';
 import Header from './Header';
+import ConfirmationModal from './ConfirmationModal';
 import OrderDetailsModal from './OrderDetailsModal'; // Import your modal component
 import './card.css';
 
 // Initialize WebSocket connection
 // const socket = new WebSocket('ws://localhost:8081/');
-// const socket = new WebSocket('ws://192.168.68.125:8081/');
 const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');
 
 const Kitchen = () => {
@@ -14,7 +14,9 @@ const Kitchen = () => {
     const [statusFilters, setStatusFilters] = useState([true, true, true]); // Default to show all statuses
     const [showOrderDetails, setShowOrderDetails] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null); // Store the selected order
-
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [finishOrderItem, setFinishOrderItem] = useState('');
+    
     const sendMessage = (orderNumber, newStatus) => {
         const message = JSON.stringify({ orderNumber, status: newStatus });
         socket.send(message); // Send order number and new status to WebSocket
@@ -32,7 +34,6 @@ const Kitchen = () => {
         // Fetch orders from the backend
         try {
             // const response = await fetch('http://localhost:8081/orders');
-            // const response = await fetch('http://192.168.68.125:8081/orders');
             const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
             const data = await response.json();
             setOrders(data); // Set the orders with the data from the backend
@@ -115,7 +116,24 @@ const Kitchen = () => {
     }, []);
 
     // Filter orders based on the statusFilters array
-    const filteredOrders = orders.filter((order) => statusFilters[order.status]);
+    const filteredOrders = orders.filter(
+        (order) => statusFilters[order.status] && order.branch === 1
+    );
+
+    const deleteOrderFromDB = async (orderNumber) => {
+        try {
+            // const response = await fetch(`http://localhost:8081/orders/${orderNumber}`, {
+                const response = await fetch(`https://rest1-04005fd2a151.herokuapp.com/orders/${orderNumber}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete the order');
+            }
+            console.log(`Order ${orderNumber} deleted successfully`);
+        } catch (error) {
+            console.error('Error deleting order:', error);
+        }
+    };
 
     return (
         <>
@@ -140,8 +158,8 @@ const Kitchen = () => {
                                 style={{
                                     backgroundColor: 'wheat',
                                     border: '2px solid #1a1a1a',
-                                    width: '300px',
-                                    height: '200px',
+                                    width: '350px',
+                                    height: '250px',
                                     textAlign: 'center',
                                     borderRadius: '20px',
                                     display: 'flex',
@@ -149,18 +167,18 @@ const Kitchen = () => {
                                     overflow: 'hidden',
                                 }}>
 
-                                <div className='flex flex-col h-full text-gray-800'>
+                                <div className='flex flex-col h-full text-gray-800 items-center'>
                                     <div className='flex-col font-bold text-base overflow-hidden text-ellipsis'>
                                         <h2 className='text-xl'>מספר הזמנה {order.orderNumber}</h2>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
                                         <h4 className="text-center">
-                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
-                        </h4>
+                                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                                        </h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>
                                         <button
-                                            className="px-4 py-1 bg-gray-600 font-bold rounded-2xl border-2 border-gray-800"
+                                            className="px-4 py-2 bg-gray-600 font-bold rounded-2xl border-2 border-gray-800"
                                             onClick={() => {
                                                 setSelectedOrder(order); // Set the whole order object
                                                 setShowOrderDetails(true); // Show the modal
@@ -170,16 +188,26 @@ const Kitchen = () => {
                                         </button>
                                     </div>
 
-                                    <div className='flex-shrink flex sm:flex-row md:flex-row justify-between items-end p-4'>
+                                    <div className='flex-shrink flex sm:flex-row md:flex-row justify-between items-end p-2 space-x-2'>
                                         {[{ label: 'בהמתנה', status: 0 }, { label: 'בהכנה', status: 1 }, { label: 'מוכן', status: 2 }].map((button, index) => (
                                             <button
                                                 key={index}
-                                                className={`px-2 py-1 rounded-2xl font-semibold ${order.status === button.status ? 'text-black bg-red-500 border-2 border-gray-800' : 'bg-slate-300 text-gray-500'}`}
+                                                className={`px-6 py-1 rounded-2xl font-semibold ${order.status === button.status ? 'text-black bg-blue-500 border-2 border-gray-800' : 'bg-slate-300 text-gray-500'}`}
                                                 onClick={() => sendMessage(order.orderNumber, button.status)}>
                                                 {button.label}
                                             </button>
                                         ))}
                                     </div>
+                                    <button
+                                        className="mb-2 w-1/2 py-1 rounded-2xl font-bold text-black bg-red-700 border-2 border-gray-800"
+                                        // onClick={() => { }}
+                                        onClick={() => {
+                                            setFinishOrderItem(order);
+                                            setShowConfirmation(true);
+                                        }}
+                                    >
+                                        סיום
+                                    </button>
                                 </div>
                             </div>
                         ))
@@ -188,6 +216,24 @@ const Kitchen = () => {
                     )}
                 </div>
             </div>
+
+            {showConfirmation && (
+                <ConfirmationModal
+                    message={<span dir="rtl">לסיים את ההזמנה?</span>}
+                    onConfirm={async () => {
+                        // Remove the order from the database
+                        await deleteOrderFromDB(finishOrderItem.orderNumber);
+
+                        // Remove the order from the list
+                        setOrders(prevOrders => {
+                            const updatedOrders = prevOrders.filter(order => order.orderNumber !== finishOrderItem.orderNumber);
+                            return updatedOrders;
+                        });
+                        setShowConfirmation(false);
+                    }}
+                    onCancel={() => setShowConfirmation(false)}
+                />
+            )}
 
             {showOrderDetails && selectedOrder && ( // Show the order details modal when triggered
                 <OrderDetailsModal
