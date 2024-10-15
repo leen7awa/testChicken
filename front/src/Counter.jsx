@@ -5,9 +5,8 @@ import OrderDetailsModal from './OrderDetailsModal'; // Import your modal compon
 import Header from './Header';
 import './card.css';
 
-// Initialize WebSocket connection
-// const socket = new WebSocket('ws://localhost:8081/');
-const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');
+const localhost = import.meta.env.VITE_WS_SERVER;
+const socket = new WebSocket(`ws://${localhost}`);
 
 const Counter = () => {
     const [orders, setOrders] = useState([]); // Initialize with an empty array
@@ -34,8 +33,7 @@ const Counter = () => {
     // Fetch orders from the database
     const fetchOrders = async () => {
         try {
-            // const response = await fetch('http://localhost:8081/orders'); // Fetch from backend
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Fetch from backend
+            const response = await fetch(`http://${localhost}/orders`);
             const data = await response.json();
             setOrders(data); // Set orders fetched from the database
         } catch (error) {
@@ -71,11 +69,11 @@ const Counter = () => {
             }
         };
 
-        const pingInterval = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-              socket.send('ping'); // Send a ping to the server
-            }
-          }, 30000);
+        // const pingInterval = setInterval(() => {
+        //     if (socket.readyState === WebSocket.OPEN) {
+        //       socket.send('ping'); // Send a ping to the server
+        //     }
+        //   }, 30000);
 
         // WebSocket error handling
         socket.onerror = (error) => {
@@ -109,8 +107,7 @@ const Counter = () => {
     // Function to delete the order from the database
     const deleteOrderFromDB = async (orderNumber) => {
         try {
-            // const response = await fetch(`http://localhost:8081/orders/${orderNumber}`, {
-            const response = await fetch(`https://rest1-04005fd2a151.herokuapp.com/orders/${orderNumber}`, {
+            const response = await fetch(`http://${localhost}/orders/${orderNumber}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
@@ -166,8 +163,15 @@ const Counter = () => {
                                         </h4>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
                                         <h4 className="text-center">
-                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
-                        </h4>
+                                            {new Date(new Date(order.date).getTime()).toLocaleString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit',
+                                            })}
+                                        </h4>
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>
@@ -206,10 +210,8 @@ const Counter = () => {
                 <ConfirmationModal
                     message={<span dir="rtl">לסיים את ההזמנה?</span>}
                     onConfirm={async () => {
-                        // Remove the order from the database
                         await deleteOrderFromDB(finishOrderItem.orderNumber);
 
-                        // Remove the order from the list
                         setOrders(prevOrders => {
                             const updatedOrders = prevOrders.filter(order => order.orderNumber !== finishOrderItem.orderNumber);
                             return updatedOrders;

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import RestaurantHeader from "./RestaurantHeader";
 
-// Initialize WebSocket connection
-const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com//');
-// const socket = new WebSocket('ws://localhost:8081/');
+const localhost = import.meta.env.VITE_WS_SERVER;
+const socket = new WebSocket(`ws://${localhost}`);
 
 const Restaurant = () => {
 
@@ -14,8 +13,7 @@ const Restaurant = () => {
     // Fetch orders from the backend when the component mounts
     const fetchOrders = async () => {
         try {
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
-            // const response = await fetch('http://localhost:8081/orders');
+            const response = await fetch(`http://${localhost}/orders`);
             const data = await response.json();
             setOrders(data); // Set orders fetched from the backend
         } catch (error) {
@@ -58,11 +56,12 @@ const Restaurant = () => {
                 }
             }
         };
-        const pingInterval = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send('ping'); // Send a ping to the server
-            }
-        }, 30000);
+        // const pingInterval = setInterval(() => {
+        //     if (socket.readyState === WebSocket.OPEN) {
+        //         socket.send('ping'); // Send a ping to the server
+        //     }
+        // }, 30000);
+        
         // WebSocket error handling
         socket.onerror = (error) => {
             console.error('WebSocket Error: ', error);
@@ -88,16 +87,7 @@ const Restaurant = () => {
         setPreppingOrders(filteredPreppingOrders);
         setReadyOrders(filteredReadyOrders);
     }, [orders]);
-
-    // const [images] = useState([
-    //     "image1.jpg",
-    //     "image2.jpg",
-    //     "image3.jpg",
-    //     "image4.jpg",
-    //     "image5.jpg"
-    // ]);
-
-    // Import all images in the directory
+    
     const modules = import.meta.glob('./assets/images/*.jpg');
     const [images, setImages] = useState([]);
 
@@ -117,7 +107,7 @@ const Restaurant = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setCurrentImageIndex(prevIndex => (prevIndex + 1) % images.length);
-        }, 10000);
+        }, 20000);
 
         return () => clearInterval(intervalId);
     }, [images.length]);

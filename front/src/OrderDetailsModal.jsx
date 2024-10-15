@@ -10,8 +10,16 @@ const OrderDetailsModal = ({ order, onClick }) => {
                     <div className="justify justify-between text-end text-sm">
                         <h4>שם לקוח: {order.customerName}</h4>
                         <h4>התקבלה ב</h4>
-                        <h4 className="text-center">{new Date(order.date).toLocaleString()}</h4>
-
+                        <h4 className="text-center">
+                            {new Date(new Date(order.date).getTime()).toLocaleString('en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                            })}
+                        </h4>
                     </div>
                 </div>
                 <div className="flex-1 max-h-96 md:max-h-80 sm:max-h-64 overflow-y-auto">

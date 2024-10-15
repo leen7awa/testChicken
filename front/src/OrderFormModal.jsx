@@ -2,16 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import './modal.css';
 
 const OrderFormModal = ({ onClose, onSubmit }) => {
-  // const [branch] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [orderItems, setOrderItems] = useState('');
   const [branch, setBranch] = useState('');
   const hasSaved = useRef(false);  // To track if the order has already been saved
-  const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');  // WebSocket connection
-  // const socket = new WebSocket('ws://localhost:8081/');  // WebSocket connection
 
-  // const currentDate = new Date().toLocaleString();
+  const localhost = import.meta.env.VITE_WS_SERVER;
+  const socket = new WebSocket(`ws://${localhost}`);
+
   const currentDate = new Date().toLocaleString('en-US');
 
 
@@ -26,23 +25,21 @@ const OrderFormModal = ({ onClose, onSubmit }) => {
       orderItems: itemsArray,  // Send only the name for each item
       date: currentDate,  // Use the new date format
       status: 1,
-      branch,
+      branch:1, // temporary!
     };
 
     // Ensure we only save the order once
     if (!hasSaved.current) {
       onSubmit(newOrder);
-      // console.log(newOrder);
-      // WebSocket: Wait until the connection is open before sending the message
       socket.onopen = () => {
         socket.send(JSON.stringify(newOrder));  // Send new order through WebSocket
       };
 
-      const pingInterval = setInterval(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send('ping'); // Send a ping to the server
-        }
-      }, 30000);
+      // const pingInterval = setInterval(() => {
+      //   if (socket.readyState === WebSocket.OPEN) {
+      //     socket.send('ping'); // Send a ping to the server
+      //   }
+      // }, 30000);
 
       // Send the order data to the backend (MongoDB)
       submitOrderToDatabase(newOrder);
@@ -54,8 +51,7 @@ const OrderFormModal = ({ onClose, onSubmit }) => {
   // Function to submit the order to the backend
   const submitOrderToDatabase = async (orderDetails) => {
     try {
-      const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/createOrder', {
-      // const response = await fetch('http://localhost:8081/createOrder', {
+      const response = await fetch(`http://${localhost}/createOrder`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,8 +70,8 @@ const OrderFormModal = ({ onClose, onSubmit }) => {
       <div className="flex flex-col text-sm modal-content space-y-2 bg-[#fff2cd] border-2 border-gray-800 p-4">
         <h4 className="font-bold border-b-2 border-black">הוסף הזמנה חדשה</h4>
         <div className="flex flex-col space-y-2 text-end">
-          <div className="flex flex-row space-x-1 items-center">
-            <label>
+          {/* <div className="flex flex-row space-x-1 items-center"> */}
+            {/* <label>
               מספר סניף
               <input
                 type="text"
@@ -84,18 +80,18 @@ const OrderFormModal = ({ onClose, onSubmit }) => {
                 onChange={(e) => setBranch(e.target.value)}
                 required
               />
-            </label>
+            </label> */}
             <label>
               מספר הזמנה
               <input
                 type="text"
-                className="border w-1/2 p-2"
+                className="border w-full p-2"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 required
               />
             </label>
-          </div>
+          {/* </div> */}
           <label>
             שם לקוח
             <input

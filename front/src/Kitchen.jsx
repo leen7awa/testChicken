@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import StatusConvert from './StatusConvert';
 import Header from './Header';
 import ConfirmationModal from './ConfirmationModal';
 import OrderDetailsModal from './OrderDetailsModal'; // Import your modal component
 import './card.css';
 
-// Initialize WebSocket connection
-// const socket = new WebSocket('ws://localhost:8081/');
-const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');
+const localhost = import.meta.env.VITE_WS_SERVER;
+const socket = new WebSocket(`ws://${localhost}`);
 
 const Kitchen = () => {
     const [orders, setOrders] = useState([]); // Initialize with an empty array
@@ -16,7 +14,7 @@ const Kitchen = () => {
     const [selectedOrder, setSelectedOrder] = useState(null); // Store the selected order
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [finishOrderItem, setFinishOrderItem] = useState('');
-    
+
     const sendMessage = (orderNumber, newStatus) => {
         const message = JSON.stringify({ orderNumber, status: newStatus });
         socket.send(message); // Send order number and new status to WebSocket
@@ -33,8 +31,7 @@ const Kitchen = () => {
     const fetchOrders = async () => {
         // Fetch orders from the backend
         try {
-            // const response = await fetch('http://localhost:8081/orders');
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders');
+            const response = await fetch(`http://${localhost}/orders`);
             const data = await response.json();
             setOrders(data); // Set the orders with the data from the backend
         } catch (error) {
@@ -100,14 +97,14 @@ const Kitchen = () => {
             });
         };
 
-        const pingInterval = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
+        // const pingInterval = setInterval(() => {
+        //     if (socket.readyState === WebSocket.OPEN) {
 
-            }
-            else {
-                location.reload();
-            }
-        }, 10000);
+        //     }
+        //     else {
+        //         location.reload();
+        //     }
+        // }, 10000);
 
         // WebSocket error handling
         socket.onerror = (error) => {
@@ -117,13 +114,12 @@ const Kitchen = () => {
 
     // Filter orders based on the statusFilters array
     const filteredOrders = orders.filter(
-        (order) => statusFilters[order.status] && order.branch === 1
+        (order) => statusFilters[order.status]
     );
 
     const deleteOrderFromDB = async (orderNumber) => {
         try {
-            // const response = await fetch(`http://localhost:8081/orders/${orderNumber}`, {
-                const response = await fetch(`https://rest1-04005fd2a151.herokuapp.com/orders/${orderNumber}`, {
+            const response = await fetch(`http://${localhost}/orders/${orderNumber}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
@@ -172,8 +168,16 @@ const Kitchen = () => {
                                         <h2 className='text-xl'>מספר הזמנה {order.orderNumber}</h2>
                                         <h4 className='text-base'>שם לקוח: {order.customerName}</h4>
                                         <h4 className="text-center">
-                                            {new Date(new Date(order.date).getTime() - 3 * 60 * 60 * 1000).toLocaleString()}
+                                            {new Date(new Date(order.date).getTime()).toLocaleString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit',
+                                            })}
                                         </h4>
+
                                     </div>
 
                                     <div className='flex-1 mt-2 justify-center flex items-center'>
@@ -200,7 +204,6 @@ const Kitchen = () => {
                                     </div>
                                     <button
                                         className="mb-2 w-1/2 py-1 rounded-2xl font-bold text-black bg-red-700 border-2 border-gray-800"
-                                        // onClick={() => { }}
                                         onClick={() => {
                                             setFinishOrderItem(order);
                                             setShowConfirmation(true);
@@ -235,10 +238,10 @@ const Kitchen = () => {
                 />
             )}
 
-            {showOrderDetails && selectedOrder && ( // Show the order details modal when triggered
+            {showOrderDetails && selectedOrder && (
                 <OrderDetailsModal
-                    order={selectedOrder} // Pass the selected order object
-                    onClick={() => setShowOrderDetails(false)} // Close the modal
+                    order={selectedOrder}
+                    onClick={() => setShowOrderDetails(false)}
                 />
             )}
         </>

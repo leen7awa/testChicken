@@ -3,14 +3,17 @@ import React, { useState, useEffect, useRef } from 'react';
 const AddFromURL = () => {
     const [status] = useState(1);  // Default status
     const hasSaved = useRef(false);  // To track if the order is already saved
-    const socket = new WebSocket('wss://rest1-04005fd2a151.herokuapp.com/');  // WebSocket connection
-    
+
+    const localhost = import.meta.env.VITE_WS_SERVER;
+    const socket = new WebSocket(`ws://${localhost}`);
+
     // Retrieve parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const orderNumber = urlParams.get('orderNumber');
     const customerName = urlParams.get('customerName');
     const orderItems = urlParams.get('orderItems');
-    const branchNumber = urlParams.get('branchNumber');
+    // const branchNumber = urlParams.get('branchNumber');
+    // const branchNumber = useState('1');
 
     const currentDate = new Date().toLocaleString('en-US');  // Get current date and time
 
@@ -18,7 +21,7 @@ const AddFromURL = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/orders'); // Replace with your backend URL
+            const response = await fetch(`http://${localhost}/orders`); // Replace with your backend URL
             const data = await response.json();
 
             // Check if the order number exists
@@ -26,8 +29,6 @@ const AddFromURL = () => {
 
             if (exists) {
                 setNumberExist(true);
-                // console.log(`Order with orderNumber ${orderNumber} already exists.`);
-                //alert('מספר ההזמנה קיים במערכת!');
             } else {
                 // If the order does not exist, add it to the database
                 const parsedOrderItems = orderItems.split(',').map(item => ({
@@ -40,7 +41,8 @@ const AddFromURL = () => {
                     orderItems: parsedOrderItems,  // Send only the name for each item
                     date: currentDate,
                     status: 1,
-                    branch: branchNumber,
+                    branch: 1,
+                    // branch: 1, // temporary!
                 };
 
                 // Submit the order to the database
@@ -56,10 +58,10 @@ const AddFromURL = () => {
         } catch (error) {
             console.error('Error fetching orders:', error);
         }
-		
-		setTimeout(() => {
-			window.close();
-		}, 100);
+
+        setTimeout(() => {
+            window.close();
+        }, 100);
     };
 
     useEffect(() => {
@@ -67,12 +69,12 @@ const AddFromURL = () => {
             fetchOrders();  // Fetch the orders when the component mounts
             hasSaved.current = true;  // Prevent further submissions
         }
-    }, [orderNumber, customerName, orderItems, status, currentDate,branchNumber]);
+    }, [orderNumber, customerName, orderItems, status, currentDate]);
 
     // Function to submit the order to the backend
     const submitOrderToDatabase = async (orderDetails) => {
         try {
-            const response = await fetch('https://rest1-04005fd2a151.herokuapp.com/createOrder', {
+            const response = await fetch(`http://${localhost}/createOrder`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
